@@ -1,12 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
-import {
-  IsEmail,
-  IsNotEmpty,
-  MaxLength,
-  MinLength,
-  Validate,
-} from 'class-validator';
-import { PasswordValidation } from 'class-validator-password-check';
+import { IsEmail, IsNotEmpty } from 'class-validator';
+import { EqualTo } from 'src/modules/shared/decorators/equal-to.decorator';
+import { IsPassword } from 'src/modules/shared/decorators/is-password.decorator';
 
 @InputType()
 export class CreateUserInput {
@@ -20,19 +15,13 @@ export class CreateUserInput {
   email: string;
 
   @Field()
-  @MinLength(6)
-  @MaxLength(20)
-  @Validate(PasswordValidation, [
-    {
-      mustContainLowerLetter: true,
-      mustContainNumber: true,
-      mustContainSpecialCharacter: true,
-      mustContainUpperLetter: true,
-    },
-  ])
+  @IsPassword()
   password: string;
 
   @Field()
-  @IsNotEmpty()
-  confirm_password: string;
+  @IsPassword()
+  @EqualTo('password', {
+    message: 'confirmPassword must be equal to password',
+  })
+  confirmPassword: string;
 }
