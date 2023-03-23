@@ -1,23 +1,10 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { PublicUserDataOutput } from '../output/public-user-data.output';
-import { randomUUID } from 'crypto';
 import { CreateUserInput } from '../input/create-user.input';
 import { IUserService } from '../../domain/user.service';
 import { Inject } from '@nestjs/common';
 import { BadRequestException } from 'src/modules/shared/exceptions/bad-request.exception';
-
-const users = [
-  {
-    id: randomUUID(),
-    email: 'test@test.com',
-    name: 'Test User',
-  } as PublicUserDataOutput,
-  {
-    id: randomUUID(),
-    email: 'devpedrogabriel@gmail.com',
-    name: 'Test User 2',
-  } as PublicUserDataOutput,
-];
+import { UpdateUserInput } from '../input/update-user-data';
 
 @Resolver()
 export class UserResolver {
@@ -26,8 +13,13 @@ export class UserResolver {
   ) {}
 
   @Query(() => PublicUserDataOutput)
-  async user() {
-    return users[0];
+  async user(@Args('email') email: string): Promise<PublicUserDataOutput> {
+    try {
+      const user = await this.service.findUserByEmail(email);
+      return PublicUserDataOutput.parseIUser(user);
+    } catch (e) {
+      BadRequestException.throw(e.message);
+    }
   }
 
   @Mutation(() => PublicUserDataOutput)
@@ -35,12 +27,24 @@ export class UserResolver {
     if (createUserInput.confirm_password !== createUserInput.password)
       BadRequestException.throw('confirm_password must be same of password');
 
-    const user = await this.service.createUser(createUserInput);
+    try {
+      const user = await this.service.createUser(createUserInput);
+      return PublicUserDataOutput.parseIUser(user);
+    } catch (e) {
+      BadRequestException.throw(e.message);
+    }
+  }
 
-    const data = new PublicUserDataOutput();
-    data.email = user.email;
-    data.id = user.id;
-    data.name = user.name;
-    return data;
+  @Mutation(() => PublicUserDataOutput)
+  async updateUser(
+    @Args('findEmail') findEmail: string,
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+  ) {
+    try {
+      const user = await this.service.updateUser(findEmail, updateUserInput);
+      return PublicUserDataOutput.parseIUser(user);
+    } catch (e) {
+      BadRequestException.throw(e.message);
+    }
   }
 }
