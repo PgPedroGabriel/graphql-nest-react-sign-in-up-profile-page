@@ -4,8 +4,8 @@ import { CreateUserInput } from '../input/create-user.input';
 import { IUserService } from '../../domain/user.service';
 import { Inject } from '@nestjs/common';
 import { BadRequestException } from 'src/modules/shared/exceptions/bad-request.exception';
-import { UpdateUserInput } from '../input/update-user-data';
-import { UpdateUserPasswordInput } from '../input/update-user-password';
+import { UpdateUserInput } from '../input/update-user-data.input';
+import { UpdateUserPasswordInput } from '../input/update-user-password.input';
 
 @Resolver()
 export class UserResolver {
