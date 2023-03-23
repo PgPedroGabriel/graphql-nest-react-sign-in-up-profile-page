@@ -26,7 +26,7 @@ export class UserRepository implements IRepository<IUser> {
     return;
   }
 
-  async save(user: IUser): Promise<void> {
+  async create(user: IUser): Promise<void> {
     await this.knex('users').insert(user);
     return;
   }
