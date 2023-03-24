@@ -3,11 +3,14 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UserResolver } from './graphql/resolver/user.resolver';
 import { APP_PIPE } from '@nestjs/core';
+import * as dotenv from 'dotenv';
+
 import { UserService } from './services/user.service';
-import { CryptoService } from '../shared/services/crypto.service';
+import { SharedModule } from '../shared/shared.module';
 import { UserRepository } from './db/repositories/user.repository';
 import { KnexModule } from 'nest-knexjs';
-import * as dotenv from 'dotenv';
+import { AuthModule } from '../auth/auth.module';
+
 dotenv.config();
 export const USER_SERVICE_TOKEN = 'USER_SERVICE_TOKEN';
 
@@ -35,11 +38,12 @@ export const USER_SERVICE_TOKEN = 'USER_SERVICE_TOKEN';
         },
       },
     }),
+    SharedModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [
     UserResolver,
-    CryptoService,
     UserRepository,
     {
       provide: APP_PIPE,

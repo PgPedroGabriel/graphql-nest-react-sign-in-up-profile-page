@@ -2,10 +2,15 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { PublicUserDataOutput } from '../output/public-user-data.output';
 import { CreateUserInput } from '../input/create-user.input';
 import { IUserService } from '../../domain/user.service';
-import { Inject } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { BadRequestException } from 'src/modules/shared/exceptions/bad-request.exception';
 import { UpdateUserInput } from '../input/update-user-data.input';
 import { UpdateUserPasswordInput } from '../input/update-user-password.input';
+import { LoginUserInput } from '../input/login-user.input';
+import { LoginUserOutput } from '../output/login-user.output';
+import { GqlJwtAuthGuard } from '../../../auth/graphql/guards/graphql.jwt.auth.guard';
+import { CurrentUser } from 'src/modules/auth/graphql/decorators/current-user.decorator';
+import { IUser } from '../../domain/user.domain';
 
 @Resolver()
 export class UserResolver {
@@ -34,20 +39,13 @@ export class UserResolver {
   }
 
   @Mutation(() => PublicUserDataOutput)
+  @UseGuards(GqlJwtAuthGuard)
   async updateUser(
-    @Args('oldEmail') oldEmail: string,
+    @CurrentUser() auth: IUser,
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
   ) {
-    const { name, newEmail, confirmNewEmail } = updateUserInput;
-    if (newEmail && newEmail !== confirmNewEmail) {
-      BadRequestException.throw('incorrect confirmation from new email');
-    }
-
     try {
-      const user = await this.service.updateUser(oldEmail, {
-        name,
-        newEmail,
-      });
+      const user = await this.service.updateUser(auth.id, updateUserInput);
       return PublicUserDataOutput.parseIUser(user);
     } catch (e) {
       BadRequestException.throw(e.message);
@@ -55,14 +53,27 @@ export class UserResolver {
   }
 
   @Mutation(() => String)
+  @UseGuards(GqlJwtAuthGuard)
   async updateUserPassword(
-    @Args('findEmail') findEmail: string,
+    @CurrentUser() auth: IUser,
     @Args('updateUserPasswordInput')
     updateUserPasswordInput: UpdateUserPasswordInput,
   ) {
     try {
-      await this.service.updatePassword(findEmail, updateUserPasswordInput);
+      await this.service.updatePassword(auth.id, updateUserPasswordInput);
       return 'ok';
+    } catch (e) {
+      BadRequestException.throw(e.message);
+    }
+  }
+
+  @Mutation(() => LoginUserOutput)
+  async doLogin(
+    @Args('loginUserInput')
+    loginUserInput: LoginUserInput,
+  ) {
+    try {
+      return await this.service.login(loginUserInput);
     } catch (e) {
       BadRequestException.throw(e.message);
     }

@@ -5,5 +5,6 @@ import { CryptoService } from './services/crypto.service';
   imports: [],
   controllers: [],
   providers: [CryptoService],
+  exports: [CryptoService],
 })
 export class SharedModule {}

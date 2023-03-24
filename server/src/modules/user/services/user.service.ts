@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { Inject } from '@nestjs/common/decorators';
+import { IToken } from 'src/modules/auth/domain/auth.domain';
+import { IAuthService } from 'src/modules/auth/domain/auth.service';
 import { CryptoService } from '../../shared/services/crypto.service';
 import { UserEntity } from '../db/entities/user.entity';
 import { UserRepository } from '../db/repositories/user.repository';
@@ -10,13 +13,39 @@ export class UserService implements IUserService {
   constructor(
     private readonly cryptoService: CryptoService,
     private readonly repository: UserRepository,
+    @Inject('AUTH_JWT_SERVICE_TOKEN')
+    private readonly authService: IAuthService,
   ) {}
 
+  async login(user: Pick<IUser, 'email' | 'password'>): Promise<IToken> {
+    const { email, password } = user;
+    const entity = await this.repository.getByEmail(email);
+    if (!entity) {
+      throw new Error('Email or Password is not correct');
+    }
+
+    const assertPassword = await this.cryptoService.assertHash(
+      password,
+      entity.password,
+    );
+
+    if (!assertPassword) {
+      throw new Error('Email or Password is not correct');
+    }
+
+    const token = await this.authService.login({
+      ...entity,
+      password: null,
+    });
+
+    return token;
+  }
+
   async updatePassword(
-    findEmail: string,
+    id: string,
     passwordChangeParams: IPasswordChange,
   ): Promise<void> {
-    const entity = await this.repository.getByEmail(findEmail);
+    const entity = await this.repository.get(id);
     if (!entity) {
       throw new Error('Email does not exists');
     }
@@ -63,10 +92,10 @@ export class UserService implements IUserService {
   }
 
   async updateUser(
-    oldEmail: string,
+    id: string,
     user: Pick<IUser, 'name'> & { newEmail?: string },
   ): Promise<IUser> {
-    const entity = await this.repository.getByEmail(oldEmail);
+    const entity = await this.repository.get(id);
     if (!entity) {
       throw new Error('Email does not exists');
     }
