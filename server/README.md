@@ -27,7 +27,7 @@ mutation CreateUser($createUserInput: CreateUserInput!) {
 }
 ```
 Query Variables:
-```graphql
+```json
 {
   "createUserInput": {
   	"name": "Pedro Gabriel",
@@ -49,7 +49,7 @@ mutation DoLogin($loginUserInput: LoginUserInput!) {
 }
 ```
 Query Variables:
-```graphql
+```json
 {
   "loginUserInput": {
     "email": "somefancyemail@gmail.com",
@@ -63,7 +63,7 @@ Save the `accessToken` in some place to use in the next requests
 ### updateUser Mutation
 
 Http Headers:
-```graphql
+```json
 {
   "Authorization": "Bearer ...ACCESS_TOKEN..."
 }
@@ -79,7 +79,7 @@ mutation UpdateUser($updateUserInput: UpdateUserInput!) {
 }
 ```
 Query Variables:
-```graphql
+```json
 {
   "updateUserInput": {
     "name": "Pedro Gabriel Rabelo Barboza",
@@ -92,7 +92,7 @@ Query Variables:
 ### updatePassword Mutation
 
 Http Headers:
-```graphql
+```json
 {
   "Authorization": "Bearer ...ACCESS_TOKEN..."
 }
@@ -104,7 +104,7 @@ mutation UpdateUserPassword($updateUserPasswordInput: UpdateUserPasswordInput!) 
 }
 ```
 Query Variables:
-```graphql
+```json
 {
   "updateUserPasswordInput": {
     "oldPassword": "oldSecurePassword*&3131",
@@ -117,7 +117,7 @@ Query Variables:
 ### user Query
 
 Http Headers:
-```graphql
+```json
 {
   "Authorization": "Bearer ...ACCESS_TOKEN..."
 }
