@@ -17,5 +17,5 @@ export interface IUserService {
     id: string,
     passwordChangeParams: IPasswordChange,
   ): Promise<void>;
-  findUserByEmail(email: string): Promise<IUser>;
+  findUserById(id: string): Promise<IUser>;
 }

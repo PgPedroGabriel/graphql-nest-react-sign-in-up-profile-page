@@ -19,9 +19,10 @@ export class UserResolver {
   ) {}
 
   @Query(() => PublicUserDataOutput)
-  async user(@Args('email') email: string): Promise<PublicUserDataOutput> {
+  @UseGuards(GqlJwtAuthGuard)
+  async user(@CurrentUser() auth: IUser): Promise<PublicUserDataOutput> {
     try {
-      const user = await this.service.findUserByEmail(email);
+      const user = await this.service.findUserById(auth.id);
       return PublicUserDataOutput.parseIUser(user);
     } catch (e) {
       BadRequestException.throw(e.message);

@@ -74,6 +74,15 @@ export class UserService implements IUserService {
     return entity;
   }
 
+  async findUserById(id: string): Promise<IUser> {
+    const entity = await this.repository.get(id);
+    if (!entity) {
+      throw new Error('User does not exists');
+    }
+
+    return entity;
+  }
+
   async createUser(user: Omit<IUser, 'id'>): Promise<IUser> {
     if (await this.repository.getByEmail(user.email)) {
       throw new Error('Email already exists');
